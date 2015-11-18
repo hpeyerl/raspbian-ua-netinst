@@ -32,11 +32,14 @@ fi
 if [ "$losetup_lt_2_22" = "true" ] ; then
 
   kpartx -as $IMG
-  mkfs.vfat /dev/mapper/loop0p1
-  mount /dev/mapper/loop0p1 /mnt
+  LOOP=$(kpartx -l $IMG | grep ^loop | cut -d ' ' -f 1)
+  mkfs.vfat /dev/mapper/$LOOP
+  mount /dev/mapper/$LOOP /mnt
   cp -r bootfs/* /mnt/
   umount /mnt
-  kpartx -d $IMG || true
+  kpartx -d /dev/mapper/$LOOP
+  LOOP=$(echo $LOOP | sed -e 's/p1//')
+  losetup -d /dev/$LOOP 
 
 else
 
